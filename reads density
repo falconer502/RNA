@@ -1,0 +1,49 @@
+import os,sys,math
+import matplotlib.pyplot as plt
+file =sys.argv[1]
+window=1000
+#os.system()
+from matplotlib import style
+
+count=[]
+cov=window
+cov_hash={}
+with open (file,'r') as f:
+        for line in f:
+                spos=line.split('\t')[3]
+
+                count.append(spos)
+
+for i in count:
+
+        i=int(i)#print(cov,i)
+        while(cov<i):
+                if cov in cov_hash:
+                        pass
+                else:
+                        cov_hash[cov]=0
+                cov=cov+window
+
+        try:
+                cov_hash[cov]+=1
+
+        except KeyError:
+                cov_hash[cov]=1
+
+
+
+
+x=[]
+y=[]
+for n in sorted(cov_hash.keys()):
+        print(n,cov_hash[n])
+        xias=n
+        x.append(xias)
+        if cov_hash[n]>0:
+                cov_hash[n]=math.log(cov_hash[n],2)
+        y.append(cov_hash[n])
+style.use('ggplot')
+fig=plt.figure(figsize=(10,1))
+
+plt.bar(x,y,0.1,facecolor="blue",edgecolor='blue')
+plt.show()
