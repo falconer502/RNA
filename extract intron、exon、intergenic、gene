@@ -1,0 +1,78 @@
+import sys
+import re
+
+inputfile=sys.argv[1]
+gene=open ('gene.gtf','w')
+exon=open ('exon.gtf','w')
+intron=open ('intron.gtf','w')
+inter=open('intergenic.gtf','w')
+gene_hash={}
+RNA_hash={}
+r=re.compile(r'Name=(.*);pacid')
+with open (inputfile,'r') as f:
+	for line in f:
+		line=line.strip()
+		if line.startswith('#'):continue
+		chrom,phy,genetype,start,end,dot1,chain,dot2,ID =line.split('\t')
+		
+		if genetype == 'gene':
+			print (line,file=gene,end='\n')
+			
+			chrkey=str(chrom)+str(chain)
+			try:
+				gene_hash[chrkey].append([int(start),int(end),ID])
+			except KeyError:
+				gene_hash[chrkey]=[[int(start),int(end),ID]]
+				
+		elif genetype =='mRNA':
+			m=r.search(ID)
+			mRNAkey=m.group(1)
+			RNA_hash[mRNAkey]=[] #mRNAkey=AT1G01540.2
+			#print(mRNAkey)
+			
+		else:
+			print (line,file=exon,end='\n')
+			if mRNAkey in ID:
+				RNA_hash[mRNAkey].append([int(start),int(end),chrom,chain,ID])
+
+for genekeys in sorted(gene_hash.keys()):
+
+	gene_hash[genekeys].sort()
+	laststart=0
+	lastend=0
+	lastattr=''
+	chrom=genekeys[:-1]
+	chain=genekeys[-1]
+	#print(chrom,chain,gene_hash[genekeys],file=inter)
+	for  i in gene_hash[genekeys]:
+		start,end,attr=i[:]
+		print(chrom,'phytozomev10','intergenic',int(lastend)+1,int(start)-1,'.',chain,'.',lastattr+'-'+attr,sep='\t',end='\n',file=inter)
+		laststart=start
+		lastend=end
+		lastattr=attr
+intron_list=[]
+for mRNAkey in RNA_hash.keys():
+	RNA_hash[mRNAkey].sort()
+	laststart=''
+	lastend=''
+	i=1
+	for exon in RNA_hash[mRNAkey]:
+		#pirnt()
+		start,end,chrom,chain,mid=exon[:]
+		try:
+			if int(start)-int(lastend)>1 :
+				intron_list.append([chrom,'phytozomev10','intron',str(lastend+1),str(start-1),'.',chain,'.','intron'+str(i),mid])
+				#print(chrom,'phytozomev10','intron',lastend+1,start-1,'.',chain,'.','intron'+str(i),mid,sep='\t',end='\n',file=intron)
+				i=i+1
+				laststart=start
+				lastend=end
+		except ValueError:
+			laststart=start
+			lastend=end
+
+
+intron_list.sort(key=lambda x:x[0])#sort chrom
+#intron_list.sort(key=lambda x:int(x[3]))# sort start
+intron_list = sorted(intron_list,key=lambda x: (x[0], int(x[3])))
+for i in intron_list:
+	print('\t'.join(i),end='\n',file=intron)
