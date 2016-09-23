@@ -61,7 +61,7 @@ def stringtie(gtf,filepath):
                                         continue
                                         # stringite after emerging  gtf  #t01.sam.sorted.bam  -b t01.sam -G ./temp/merged.gtf -c t01.cov_ref.gtf -o t01.sam.stringtie.out.gtf
                         else:
-                                exec('samtools view -Su ./temp/%s | samtools sort - ./temp/%s.sorted'%(name,name),'converted to bam format using samtools')
+                                exec('samtools view -Su ./temp/%s | samtools sort > ./temp/%s.sorted'%(name,name),'converted to bam format using samtools')
                                 exec('stringtie ./temp/%s.sorted.bam -G %s -p 7 -o ./temp/stringtie/%s.stringtie.out.gtf'%(name,gtf,name),'transcript assembly and qualntification for RNA-SEQ using stingtie ')
                         #t01.sam.sorted.bam
 def merge(filepath,gtf):
