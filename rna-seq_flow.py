@@ -51,14 +51,14 @@ def align_genome(genome,fa_path):   #align genome,input path of data files
 def stringtie(gtf,filepath):
 	datalist_tmp=[i+'.sam' for i in datalist]
 	if set(datalist_tmp).issubset(set(os.listdir(filepath))) and 'merged.gtf' in gtf :
-		for i in os.listdir(filepath):
+		for i in datalist_tmp:
 			name=i.split('.')[0]
 			print(i)
 			exec('stringtie ./temp/%s -b ./results/%s -e -G ./merge/merged.gtf -C ./results_gtf/%s.cov_ref.gtf -p 20 -o ./results_gtf/%s.stringtie.out.gtf'%(i,name,name,name),'transcript assembly and qualntification for RNA-SEQ using stingtie ')
 			# stringite after emerging  gtf  #t01.sam.sorted.bam  -b t01.sam -G ./temp/merged.gtf -c t01.cov_ref.gtf -o t01.sam.stringtie.out.gtf
 	else:	
-		for i in os.listdir(filepath):
-			name=i.split('.')[0]
+		for i in datalist_tmp:
+			name=i
 			exec('samtools view -Su ./temp/%s | samtools sort > ./temp/%s.sorted.bam'%(name,name),'converted %s to bam format using samtools'%(name))
 			exec('stringtie ./temp/%s.sorted.bam -G %s -p 20 -o ./temp/stringtie/%s.stringtie.out.gtf'%(name,gtf,name),'%s transcript assembly and qualntification for RNA-SEQ using stingtie'%(name))
 			#t01.sam.sorted.bam
@@ -68,7 +68,7 @@ def merge(filepath,gtf):
 	listfile=' '.join(list)
 	write_log(listfile)
 	exec('stringtie --merge %s -G %s -o ./merge/merged.gtf'%(listfile,gtf),'merge all gtf.......')
-	exec('rm %s'%(listfile))
+	exec('rm %s'%(listfile),'delete gtf file.........')
 #def ballgown():
 
 
