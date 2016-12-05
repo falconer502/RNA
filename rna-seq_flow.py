@@ -1,6 +1,5 @@
 import subprocess
 import os,shutil,getopt,sys
-global datalist
 def write_log(log):
 	f=open('log','a')
 	print(log,file = f)
@@ -50,11 +49,12 @@ def align_genome(genome,fa_path):   #align genome,input path of data files
 			exec(cmd ,"%s is algining against genome  using hisat2"%i) #execute commad
 def stringtie(gtf,filepath):
 	datalist_tmp=[i+'.sam' for i in datalist]
+	write_log(datalist_tmp)
 	if set(datalist_tmp).issubset(set(os.listdir(filepath))) and 'merged.gtf' in gtf :
 		for i in datalist_tmp:
 			name=i.split('.')[0]
 			print(i)
-			exec('stringtie ./temp/%s -b ./results/%s -e -G ./merge/merged.gtf -C ./results_gtf/%s.cov_ref.gtf -p 20 -o ./results_gtf/%s.stringtie.out.gtf'%(i,name,name,name),'transcript assembly and qualntification for RNA-SEQ using stingtie ')
+			exec('stringtie ./temp/%s.sorted.bam -b ./results/%s -e -G ./merge/merged.gtf -C ./results_gtf/%s.cov_ref.gtf -p 20 -o ./results_gtf/%s.stringtie.out.gtf'%(i,name,name,name),'%s transcript assembly and qualntification for RNA-SEQ using stingtie'%(name))
 			# stringite after emerging  gtf  #t01.sam.sorted.bam  -b t01.sam -G ./temp/merged.gtf -c t01.cov_ref.gtf -o t01.sam.stringtie.out.gtf
 	else:	
 		for i in datalist_tmp:
@@ -82,7 +82,7 @@ def usuage():
 
 
 if __name__=="__main__":
-	
+	global datalist
 	try:
 		opts,args=getopt.getopt(sys.argv[1:],"hg:t:f:",["help","genome=","gtf=","filepath="])
 		print("===============opt=====================")
@@ -111,6 +111,7 @@ if __name__=="__main__":
 	
 	write_log("setp1: creat temp directory.....")
 	mkdir('temp')
+	mkdir('results_gtf')
 	mkdir('./temp/stringtie')
 	mkdir('merge')
 	mkdir('results')    #create a temporary  folder
@@ -118,7 +119,6 @@ if __name__=="__main__":
 	build_index(genome,gtf)
 	write_log('step3: algin genome.............')
 	align_genome(genome,filepath) # align genome and remove the result to temp)
-
 	write_log('step4:stringtie.................')
 	stringtie(gtf,'./temp') 
 	write_log('step5:merging...................')
