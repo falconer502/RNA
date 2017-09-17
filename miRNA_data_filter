@@ -1,0 +1,35 @@
+import sys,getopt
+from Bio import SeqIO
+try:
+    options,args=getopt.getopt(sys.argv[1:],"hi:p:m:x",["help","input=","pre=","min=","max="])
+except getopt.GetoptError:
+    sys.exit()
+
+length_min=18
+length_max=30
+for name,value in options:
+    if name in ("-h","--help"):
+        usage()
+    if name in ("-i","--input"):
+        file = value
+    if name in ("-p","--pre"):
+        prename=value
+    if name in ("-m","--min"):
+        length_min=value
+    if name in ("-x","--max"):
+        length_max=value
+
+#out=sys.argv[2]
+genehash={}
+count=1
+for seq_record in SeqIO.parse(file, "fasta"):
+    sequence=str(seq_record.seq)
+    #print(sequence)
+    if sequence in genehash:
+        genehash[sequence]+=1
+    else:
+        genehash[sequence]=1
+for key, value in genehash.items():
+    if len(key)>length_min and len(key)<=length_max:
+        print(">%s_%s_x%s\n%s"%(prename,count,value,key))
+        count=count+1
